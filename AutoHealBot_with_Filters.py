@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-'''Habitica Autoheal Script for Healer Class
-Checks if party has lost hp and if lower threshold is reached and enough mana is present a heal is triggered until mana is depleted or party health is over upper threshold'''
+'''Habitica Autoheal Script for Healer Class'''
 
 from os import system, name, path
 from sys import exit, argv
@@ -94,15 +93,18 @@ def GetPartyHp():
     hp = [[], []]
     mp = [[], []]
     for i in range(len(PARTY)):
-        player = json.loads(requests.get(mrt + PARTY[i], headers=XCLIENTHEADER).content)
-        names.append(player['data']['auth']['local']['username'])
-        logging.debug('*** Getting data of %s' % player['data']['auth']['local']['username'])
-        hp[0].append(int(player['data']['stats']['hp']))
-        hp[1].append(int(player['data']['stats']['maxHealth']))
-        if player['data']['auth']['local']['username'] == 'MetHorn':
-            mp[0].append(int(player['data']['stats']['mp']))
-            mp[1].append(int(player['data']['stats']['maxMP']))
-        sleep(0.3)
+        try:
+            player = json.loads(requests.get(mrt + PARTY[i], headers=XCLIENTHEADER).content)
+            names.append(player['data']['auth']['local']['username'])
+            logging.debug('*** Getting data of %s' % player['data']['auth']['local']['username'])
+            hp[0].append(int(player['data']['stats']['hp']))
+            hp[1].append(int(player['data']['stats']['maxHealth']))
+            if player['data']['auth']['local']['username'] == 'MetHorn':
+                mp[0].append(int(player['data']['stats']['mp']))
+                mp[1].append(int(player['data']['stats']['maxMP']))
+            sleep(0.5)
+        except:
+            pass
 
     clear()
     logging.debug('HP-Overview:\n')
@@ -154,6 +156,7 @@ if __name__ == '__main__':
                      'x-api-key': APITOKEN}
 
     # Test if API is ok
+    excode = -99
     if not GetApiStatus():
         if WRITE_LOG and excode != 0:
             with open(SCRIPT_PATH + '/AutoHealBot.log', 'a+') as f:
@@ -226,8 +229,6 @@ if __name__ == '__main__':
         excode = -2
 
     # *** !!! for running in Pydroid -> ALLWAYS LOG !!!
-    #WRITE_LOG = True
-
     if WRITE_LOG and excode != 0:
         with open(SCRIPT_PATH + '/AutoHealBot.log', 'a+') as f:
             logtime = datetime.datetime.now()
